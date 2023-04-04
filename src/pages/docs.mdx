@@ -1,3 +1,5 @@
+import MarkdownLayout from "../components/MarkdownLayout";
+
 # euri-test-api (v2)
 
 Fake Online REST API for Testing and Prototyping
@@ -7,13 +9,13 @@ Copyright (c) 2018 - 2023 Euricom nv.
 Licensed under the [MIT license](https://opensource.org/licenses/MIT).
 v 2.0.0
 
-<hr>
+<hr />
 
 ## GraphQL API
 
 Open [/graphql](/graphql) to view the graphQL playground
 
-<hr>
+<hr />
 
 ## REST API
 
@@ -26,8 +28,8 @@ DELETE /api/v1/system
 
 ### Tasks
 
-* GET [/api/v1/tasks](/api/v1/tasks)
-* GET [/api/v1/tasks/1](/api/v1/tasks/1)
+- GET [/api/v1/tasks](/api/v1/tasks)
+- GET [/api/v1/tasks/1](/api/v1/tasks/1)
 
 ```
 POST /api/tasks
@@ -45,11 +47,11 @@ DELETE /api/tasks/122
 
 ### Users
 
-* GET [/api/v1/users](/api/v1/users)
-* GET [/api/v1/users/12](/api/v1/users/12)
-* GET [/api/v1/users?page=0&pageSize=10](/api/v1/users?page=0&pageSize=10)
-* GET [/api/v1/users?sort=firstName-](/api/v1/users?sort=firstName-)
-* GET [/api/v1/users?sort=address.city](/api/v1/users?sort=address.city)
+- GET [/api/v1/users](/api/v1/users)
+- GET [/api/v1/users/12](/api/v1/users/12)
+- GET [/api/v1/users?page=0&pageSize=10](/api/v1/users?page=0&pageSize=10)
+- GET [/api/v1/users?sort=firstName-](/api/v1/users?sort=firstName-)
+- GET [/api/v1/users?sort=address.city](/api/v1/users?sort=address.city)
 
 ```
 POST /api/users
@@ -75,11 +77,11 @@ DELETE /api/users/12
 
 ### Products
 
-* GET [/api/v1/products](/api/v1/products)
-* GET [/api/v1/products/1](/api/v1/products/1)
-* GET [/api/v1/products?page=0&pageSize=10](/api/v1/products?page=0&pageSize=10)
-* GET [/api/v1/products?sort=price](/api/v1/products?sort=price)
-* GET [/api/v1/products?sort=-price](/api/v1/products?sort=-price)
+- GET [/api/v1/products](/api/v1/products)
+- GET [/api/v1/products/1](/api/v1/products/1)
+- GET [/api/v1/products?page=0&pageSize=10](/api/v1/products?page=0&pageSize=10)
+- GET [/api/v1/products?sort=price](/api/v1/products?sort=price)
+- GET [/api/v1/products?sort=-price](/api/v1/products?sort=-price)
 
 ```
 # create a new product
@@ -108,7 +110,7 @@ DELETE /api/v1/products/12
 
 ### Basket
 
-* GET [/api/v1/basket/xyz](/api/v1/basket/xyz)
+- GET [/api/v1/basket/xyz](/api/v1/basket/xyz)
 
 ```
 # Get the basket with key
@@ -144,3 +146,5 @@ DELETE /api/v1/basket/{yourKey}
 # Remove the product from the basket
 DELETE /api/v1/basket/{yourKey}/product/46
 ```
+
+export default ({ children }) => <MarkdownLayout>{children}</MarkdownLayout>;
