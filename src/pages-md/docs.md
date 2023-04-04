@@ -1,0 +1,146 @@
+# euri-test-api (v2)
+
+Fake Online REST API for Testing and Prototyping
+
+Copyright (c) 2018 - 2023 Euricom nv.
+
+Licensed under the [MIT license](https://opensource.org/licenses/MIT).
+v 2.0.0
+
+<hr>
+
+## GraphQL API
+
+Open [/graphql](/graphql) to view the graphQL playground
+
+<hr>
+
+## REST API
+
+### System
+
+```json
+# reset all data
+DELETE /api/v1/system
+```
+
+### Tasks
+
+* GET [/api/v1/tasks](/api/v1/tasks)
+* GET [/api/v1/tasks/1](/api/v1/tasks/1)
+
+```
+POST /api/tasks
+{
+  "desc": "By some beer"
+}
+
+PATCH /api/tasks
+{
+  "completed": true
+}
+
+DELETE /api/tasks/122
+```
+
+### Users
+
+* GET [/api/v1/users](/api/v1/users)
+* GET [/api/v1/users/12](/api/v1/users/12)
+* GET [/api/v1/users?page=0&pageSize=10](/api/v1/users?page=0&pageSize=10)
+* GET [/api/v1/users?sort=firstName-](/api/v1/users?sort=firstName-)
+* GET [/api/v1/users?sort=address.city](/api/v1/users?sort=address.city)
+
+```
+POST /api/users
+{
+  "firstName": "peter",
+  "lastName": "cosemans",
+  "age": 52,
+  "email": "peter.cosemans@gmail.com",
+  "role": "admin"
+}
+
+PUT /api/users/12
+{
+  "firstName": "peter",
+  "lastName": "cosemans",
+  "age": 52,
+  "email": "peter.cosemans@gmail.com",
+  "role": "admin"
+}
+
+DELETE /api/users/12
+```
+
+### Products
+
+* GET [/api/v1/products](/api/v1/products)
+* GET [/api/v1/products/1](/api/v1/products/1)
+* GET [/api/v1/products?page=0&pageSize=10](/api/v1/products?page=0&pageSize=10)
+* GET [/api/v1/products?sort=price](/api/v1/products?sort=price)
+* GET [/api/v1/products?sort=-price](/api/v1/products?sort=-price)
+
+```
+# create a new product
+POST /api/products
+{
+  "title": "my new product",
+  "price": 9.99,
+  "stocked": true,
+  "desc": "just some text",
+  "image": "https://dummyimage.com/300x300.jpg"
+}
+
+# Update an existing product
+PUT /api/products/12
+{
+  "title": "my new product",
+  "price": 9.99,
+  "stocked": true,
+  "desc": "just some text",
+  "image": "https://dummyimage.com/300x300.jpg"
+}
+
+# Remove the product
+DELETE /api/v1/products/12
+```
+
+### Basket
+
+* GET [/api/v1/basket/xyz](/api/v1/basket/xyz)
+
+```
+# Get the basket with key
+# If there are more the 5 items in the basket the request will throw an internal server error
+GET /api/v1/basket/{yourKey}
+```
+
+```
+# Add product to basket
+# If the product already exist in the basket the quantity is added
+# Product not found: 404 error
+# Product not in stock: 409 error
+
+POST /api/v1/basket/{yourKey}/product/1
+{
+  "quantity": 2
+}
+
+# Update quantity for product
+# When quantity is '0' the product is removed
+# When the product is not available in the basket the product is added
+# Product not found: 404 error
+# Product not in stock: 409 error
+
+PATCH /api/v1/basket/{yourKey}/product/1
+{
+  "quantity": 10
+}
+
+# Empty the basket
+DELETE /api/v1/basket/{yourKey}
+
+# Remove the product from the basket
+DELETE /api/v1/basket/{yourKey}/product/46
+```
