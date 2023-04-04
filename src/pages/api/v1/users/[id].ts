@@ -71,10 +71,6 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
    *             $ref: '#/components/schemas/user'
    *       404:
    *         description: NOT_FOUND
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/error'
    */
   if (req.method === "GET") {
     res.status(200).json(user);
@@ -109,17 +105,8 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
    *             $ref: '#/components/schemas/user'
    *       404:
    *         description: NOT_FOUND
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/error'
    *       400:
    *         description: BAD_REQUEST
-   *         summary: Invalid user
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/error'
    */
   if (req.method === "PUT") {
     const result = userPutSchema.safeParse(req.body);

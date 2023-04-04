@@ -14,22 +14,6 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
 
   const task = getTask(Number(id));
 
-  /**
-   * @swagger
-   * /api/v1/tasks/{id}:
-   *   delete:
-   *     description: Removes a task
-   *     tags: [tasks]
-   *     responses:
-   *       200:
-   *         description: OK
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/task'
-   *       204:
-   *         description: NO_CONTENT
-   */
   if (req.method === "DELETE") {
     if (!task) {
       return res.status(204).send(null);
@@ -46,26 +30,6 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
     });
   }
 
-  /**
-   * @swagger
-   * /api/v1/tasks/{id}:
-   *   get:
-   *     description: Removes a task
-   *     tags: [tasks]
-   *     responses:
-   *       200:
-   *         description: OK
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/task'
-   *       404:
-   *         description: NOT_FOUND
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/error'
-   */
   if (req.method === "GET") {
     res.status(200).json(task);
   }
@@ -99,17 +63,8 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
    *             $ref: '#/components/schemas/task'
    *       404:
    *         description: NOT_FOUND
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/error'
    *       400:
    *         description: BAD_REQUEST
-   *         summary: Invalid task
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/error'
    */
   if (req.method === "PUT") {
     const result = taskPutSchema.safeParse(req.body);

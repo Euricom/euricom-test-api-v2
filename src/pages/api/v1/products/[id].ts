@@ -61,10 +61,6 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
    *             $ref: '#/components/schemas/task'
    *       404:
    *         description: NOT_FOUND
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/error'
    */
   if (req.method === "GET") {
     res.status(200).json(task);
@@ -99,17 +95,8 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
    *             $ref: '#/components/schemas/task'
    *       404:
    *         description: NOT_FOUND
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/error'
    *       400:
    *         description: BAD_REQUEST
-   *         summary: Invalid task
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/error'
    */
   if (req.method === "PUT") {
     const result = taskPutSchema.safeParse(req.body);

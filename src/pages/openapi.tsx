@@ -4,9 +4,9 @@ import dynamic from "next/dynamic";
 import "swagger-ui-react/swagger-ui.css";
 import pkg from "../../package.json";
 import { generateSchema } from "@anatine/zod-openapi";
-import { taskSchema } from "@/server/taskRepo";
-import { userSchema } from "@/server/userRepo";
-import { productSchema } from "@/server/productRepo";
+import { taskSchema } from "@/server/repos/tasks";
+import { userSchema } from "@/server/repos/users";
+import { productSchema } from "@/server/repos/products";
 
 const SwaggerUI = dynamic(() => import("swagger-ui-react"), {
   ssr: false,
@@ -33,25 +33,10 @@ export const getStaticProps: GetStaticProps = () => {
           user: generateSchema(userSchema),
           product: generateSchema(productSchema),
           basket: generateSchema(productSchema),
-          error: {
-            type: "object",
-            properties: {
-              error: {
-                type: "string",
-              },
-              message: {
-                type: "string",
-              },
-              details: {
-                required: false,
-                type: "string",
-              },
-            },
-          },
         },
       },
     },
-    apiFolder: "src/pages/api",
+    apiFolder: "src/app/api",
   });
 
   return {

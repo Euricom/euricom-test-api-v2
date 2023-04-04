@@ -77,10 +77,6 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
    *             $ref: '#/components/schemas/user'
    *       404:
    *         description: NOT_FOUND
-   *         content:
-   *           application/json:
-   *            schema:
-   *             $ref: '#/components/schemas/error'
    */
   if (req.method === "POST") {
     const result = userSchema.safeParse(req.body);

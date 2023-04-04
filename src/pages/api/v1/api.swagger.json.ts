@@ -1,8 +1,8 @@
 import { withSwagger } from "next-swagger-doc";
 import { generateSchema } from "@anatine/zod-openapi";
-import { taskSchema } from "@/server/taskRepo";
-import { userSchema } from "@/server/userRepo";
-import { productSchema } from "@/server/productRepo";
+import { taskSchema } from "@/server/repos/tasks";
+import { userSchema } from "@/server/repos/users";
+import { productSchema } from "@/server/repos/products";
 import pkg from "../../../../package.json";
 
 const swaggerHandler = withSwagger({
@@ -18,21 +18,6 @@ const swaggerHandler = withSwagger({
         user: generateSchema(userSchema),
         product: generateSchema(productSchema),
         basket: generateSchema(productSchema),
-        error: {
-          type: "object",
-          properties: {
-            error: {
-              type: "string",
-            },
-            message: {
-              type: "string",
-            },
-            details: {
-              required: false,
-              type: "string",
-            },
-          },
-        },
       },
     },
   },
