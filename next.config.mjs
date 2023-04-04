@@ -9,6 +9,15 @@ const config = {
   experimental: {
     appDir: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/docs",
+        permanent: true,
+      },
+    ];
+  },
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.

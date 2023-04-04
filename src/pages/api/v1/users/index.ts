@@ -1,23 +1,15 @@
-import { addTask, getAllTasks } from "@/server/taskRepo";
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { addUser, getAllUsers, userSchema } from "@/server/userRepo";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { z } from "zod";
-
-const taskPostSchema = z
-  .object({
-    desc: z.string(),
-    completed: z
-      .boolean()
-      .optional()
-      .transform((val) => !!val),
-  })
-  .strict();
+import sortOn from "sort-on";
+import { chain } from "lodash";
 
 const handler = (req: NextApiRequest, res: NextApiResponse) => {
   /**
    * @swagger
    * /api/v1/users:
    *   get:
-   *     description: Gets all tasks
+   *     description: Gets all users
    *     tags: [users]
    *     responses:
    *       200:
@@ -25,19 +17,39 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
    *         content:
    *           application/json:
    *            schema:
-   *             $ref: '#/components/schemas/task'
+   *             $ref: '#/components/schemas/user'
    */
   if (req.method === "GET") {
-    const tasks = getAllTasks();
-    res.status(200).json(tasks);
+    const page = Number(req.query.page || 0);
+    const pageSize = Number(req.query.pageSize || 20);
+    const sortBy = req.query.sort || "";
+    console.log("page:", page);
+    console.log("pageSize:", pageSize);
+    console.log("sortBy:", sortBy);
+
+    let entities = getAllUsers();
+    if (sortBy) {
+      entities = sortOn(entities, sortBy);
+    }
+    const subset = chain(entities)
+      .drop(page * pageSize)
+      .take(pageSize)
+      .value();
+
+    res.status(200).json({
+      items: subset,
+      total: entities.length,
+      page,
+      pageSize,
+    });
     return;
   }
 
   /**
    * @swagger
-   * /api/v1/users/{id}:
+   * /api/v1/users:
    *   post:
-   *     description: Create a task
+   *     description: Create a user
    *     tags: [users]
    *     consumes:
    *       - application/json
@@ -46,20 +58,14 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
    *         name: user
    *         description: The user to create.
    *         schema:
-   *           type: object
-   *           properties:
-   *             desc:
-   *               type: string
-   *             completed:
-   *               type: boolean
-   *               default: false
+   *           $ref: '#/components/schemas/user'
    *     responses:
    *       200:
    *         description: OK
    *         content:
    *           application/json:
    *            schema:
-   *             $ref: '#/components/schemas/task'
+   *             $ref: '#/components/schemas/user'
    *       404:
    *         description: NOT_FOUND
    *         content:
@@ -68,7 +74,7 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
    *             $ref: '#/components/schemas/error'
    */
   if (req.method === "POST") {
-    const result = taskPostSchema.safeParse(req.body);
+    const result = userSchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({
         error: "BadRequest",
@@ -76,12 +82,12 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
         details: result.error.format(),
       });
     }
-    const task = {
+    const user = {
       ...result.data,
       id: new Date().valueOf(),
     };
-    addTask(task);
-    res.status(201).json(task);
+    addUser(user);
+    res.status(201).json(user);
   }
 
   res.status(405).json({

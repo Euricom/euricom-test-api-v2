@@ -19,7 +19,7 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
    * /api/v1/products/{id}:
    *   delete:
    *     description: Removes a task
-   *     tags: [users]
+   *     tags: [products]
    *     responses:
    *       200:
    *         description: OK
