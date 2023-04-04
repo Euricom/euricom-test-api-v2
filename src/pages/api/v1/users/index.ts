@@ -17,7 +17,16 @@ const handler = (req: NextApiRequest, res: NextApiResponse) => {
    *         content:
    *           application/json:
    *            schema:
-   *             $ref: '#/components/schemas/user'
+   *              type: object
+   *              properties:
+   *                items:
+   *                  $ref: '#/components/schemas/user'
+   *                total:
+   *                  type: number
+   *                page:
+   *                  type: number
+   *                pageSize:
+   *                  type: number
    */
   if (req.method === "GET") {
     const page = Number(req.query.page || 0);
