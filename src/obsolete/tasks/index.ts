@@ -1,4 +1,4 @@
-import { addTask, getAllTasks } from "@/server/taskRepo";
+import { addTask, getAllTasks } from "@/server/repos/tasks";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 

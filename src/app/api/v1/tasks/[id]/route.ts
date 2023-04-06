@@ -8,7 +8,7 @@ type Context = {
   };
 };
 
-export const taskPutSchema = z
+const taskPutSchema = z
   .object({
     desc: z.string().optional(),
     completed: z.boolean().optional(),
@@ -56,7 +56,7 @@ export async function PUT(request: Request, { params }: Context) {
   if (!result.success) {
     return badRequest({
       message: "Invalid task",
-      details: result.error.format(),
+      errors: result.error.format(),
     });
   }
 

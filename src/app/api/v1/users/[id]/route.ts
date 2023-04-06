@@ -8,7 +8,7 @@ type Context = {
   };
 };
 
-export const userPutSchema = z
+const userPutSchema = z
   .object({
     firstName: z.string().optional(),
     lastName: z.string().optional(),
@@ -68,7 +68,7 @@ export async function PUT(request: Request, { params }: Context) {
   if (!result.success) {
     return badRequest({
       message: "Invalid User",
-      details: result.error.format(),
+      errors: result.error.format(),
     });
   }
 

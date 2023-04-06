@@ -60,7 +60,7 @@ export function POST(request: Request) {
   if (!result.success) {
     return badRequest({
       message: "Invalid task",
-      details: result.error.format(),
+      errors: result.error.format(),
     });
   }
 

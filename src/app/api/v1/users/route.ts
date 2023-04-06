@@ -94,7 +94,7 @@ export function POST(request: Request) {
   if (!result.success) {
     return badRequest({
       message: "Invalid user",
-      details: result.error.format(),
+      errors: result.error.format(),
     });
   }
 
