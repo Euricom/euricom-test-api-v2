@@ -28,16 +28,11 @@ export const taskPutSchema = z
  *       in: "path"
  *       required: true
  *       type: "integer"
- *     - in: body
- *       required: true
- *       schema:
- *         type: object
- *         properties:
- *           desc:
- *             type: string
- *           completed:
- *             type: boolean
- *             default: false
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/task'
  *     responses:
  *       200:
  *         description: OK

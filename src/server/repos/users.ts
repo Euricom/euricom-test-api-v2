@@ -2,7 +2,6 @@ import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 export const userSchema = z.object({
-  id: z.number().optional(),
   firstName: z.string(),
   lastName: z.string(),
   age: z.number().min(18).max(80),
@@ -17,7 +16,9 @@ export const userSchema = z.object({
   }),
 });
 
-type User = z.infer<typeof userSchema>;
+type User = z.infer<typeof userSchema> & {
+  id: number;
+};
 
 let users: User[] = generateUsers(100);
 

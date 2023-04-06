@@ -30,7 +30,7 @@ const config = {
       {
         source: "/",
         destination: "/docs",
-        permanent: true,
+        permanent: false,
       },
     ];
   },

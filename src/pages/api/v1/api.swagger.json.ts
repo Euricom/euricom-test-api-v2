@@ -3,6 +3,7 @@ import { generateSchema } from "@anatine/zod-openapi";
 import { taskSchema } from "@/server/repos/tasks";
 import { userSchema } from "@/server/repos/users";
 import { productSchema } from "@/server/repos/products";
+import { basketSchema } from "@/server/repos/basket";
 import pkg from "../../../../package.json";
 
 const swaggerHandler = withSwagger({
@@ -17,7 +18,7 @@ const swaggerHandler = withSwagger({
         task: generateSchema(taskSchema),
         user: generateSchema(userSchema),
         product: generateSchema(productSchema),
-        basket: generateSchema(productSchema),
+        basket: generateSchema(basketSchema),
       },
     },
   },

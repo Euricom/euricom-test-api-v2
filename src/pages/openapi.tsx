@@ -7,6 +7,7 @@ import { generateSchema } from "@anatine/zod-openapi";
 import { taskSchema } from "@/server/repos/tasks";
 import { userSchema } from "@/server/repos/users";
 import { productSchema } from "@/server/repos/products";
+import { basketSchema } from "@/server/repos/basket";
 
 const SwaggerUI = dynamic(() => import("swagger-ui-react"), {
   ssr: false,
@@ -32,7 +33,7 @@ export const getStaticProps: GetStaticProps = () => {
           task: generateSchema(taskSchema),
           user: generateSchema(userSchema),
           product: generateSchema(productSchema),
-          basket: generateSchema(productSchema),
+          basket: generateSchema(basketSchema),
         },
       },
     },

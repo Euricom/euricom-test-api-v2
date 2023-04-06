@@ -40,18 +40,11 @@ export function GET() {
  *     tags: [tasks]
  *     consumes:
  *       - application/json
- *     parameters:
- *       - in: body
- *         name: user
- *         description: The user to create.
- *         schema:
- *           type: object
- *           properties:
- *             desc:
- *               type: string
- *             completed:
- *               type: boolean
- *               default: false
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/task'
  *     responses:
  *       200:
  *         description: OK
