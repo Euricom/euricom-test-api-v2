@@ -5,7 +5,12 @@ import {
   NotFoundError,
   ConflictError,
 } from "@/server/httpUtils";
-import { getOrCreateBasket } from "../../../repo";
+import {
+  addProduct,
+  getOrCreateBasket,
+  removeProductFromBasket,
+  setProductQuantity,
+} from "../../../repo";
 import { getById as getProductById } from "../../../../products/repo";
 import { z } from "zod";
 import { swaggerPath } from "@/server/swagger";
@@ -18,7 +23,7 @@ type Context = {
   };
 };
 
-const AddProductSchema = z.object({
+const QuantitySchema = z.object({
   quantity: z.number(),
 });
 
@@ -41,7 +46,7 @@ swaggerPath({
     body: {
       content: {
         "application/json": {
-          schema: AddProductSchema,
+          schema: QuantitySchema,
         },
       },
     },
@@ -77,7 +82,7 @@ export function POST(request: Request, { params }: Context) {
 
     const productId = Number(params.productId);
     const body = await request.json();
-    const data = AddProductSchema.parse(body);
+    const data = QuantitySchema.parse(body);
     let quantity = Math.floor(Number(data.quantity) || 1);
 
     // add product
@@ -95,6 +100,79 @@ export function POST(request: Request, { params }: Context) {
     quantity = (basket[index.id - 1]!.quantity || 0) + quantity;
     basket[index.id - 1]!.quantity = quantity;
     return ok(basket, 201);
+  };
+
+  return withErrorHandling(handler);
+}
+
+//
+// PATCH /api/v1/basket/{key}/products/{productId}
+//
+
+swaggerPath({
+  method: "patch",
+  path: "/api/v1/basket/{key}/products/{productId}",
+  description: "Update the quantity of a product",
+  tags: ["basket"],
+  request: {
+    params: z.object({
+      productId: z
+        .string()
+        .openapi({ description: "The id of the product to remove" }),
+      key: z.string().openapi({ description: "The basket key" }),
+    }),
+    body: {
+      content: {
+        "application/json": {
+          schema: QuantitySchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: BasketSchema,
+        },
+      },
+    },
+    404: {
+      description: "NOT_FOUND",
+    },
+    409: {
+      description: "CONFLICT",
+    },
+  },
+});
+
+export function PATCH(request: Request, { params }: Context) {
+  const handler = async () => {
+    const basket = getOrCreateBasket(params.key);
+    const product = getProductById(Number(params.productId));
+    if (!product || !basket) {
+      throw new NotFoundError();
+    }
+    if (!product.stocked) {
+      throw new ConflictError("1202", "Product not in stock");
+    }
+
+    const body = await request.json();
+    const data = QuantitySchema.parse(body);
+
+    const quantity = Math.floor(Number(data.quantity)) || 0;
+    const basketItem = basket.find((item) => item.productId === product.id);
+    if (basketItem) {
+      if (quantity == 0) {
+        removeProductFromBasket(params.key, product.id);
+      } else {
+        setProductQuantity(params.key, product.id, quantity);
+      }
+    } else {
+      addProduct(params.key, product.id, quantity);
+    }
+    return ok(basket);
   };
 
   return withErrorHandling(handler);

@@ -30,13 +30,47 @@ export function getOrCreateBasket(checkoutID: string) {
   return basket!;
 }
 
-export const removeProductFromBaskets = (productId: number) => {
-  for (const prop in baskets) {
-    if (baskets[prop]) {
-      baskets[prop] = baskets[prop]!.filter(
-        (basket) => basket.productId !== productId
-      );
-    }
+export const removeProductFromBasket = (
+  basketKey: string,
+  productId: number
+) => {
+  if (baskets[basketKey]) {
+    baskets[basketKey] = baskets[basketKey]!.filter(
+      (basket) => basket.productId !== productId
+    );
+  }
+};
+
+export const addProduct = (
+  basketKey: string,
+  productId: number,
+  quantity: number
+) => {
+  const basket = baskets[basketKey];
+  if (basket) {
+    basket.push({
+      id: basket.reduce((acc, prop) => Math.max(acc, prop.id), 0) + 1,
+      productId,
+      quantity,
+    });
+  }
+};
+
+export const setProductQuantity = (
+  basketKey: string,
+  productId: number,
+  quantity: number
+) => {
+  if (baskets[basketKey]) {
+    baskets[basketKey] = baskets[basketKey]!.map((basket) => {
+      if (basket.productId === productId) {
+        return {
+          ...basket,
+          quantity,
+        };
+      }
+      return basket;
+    });
   }
 };
 
