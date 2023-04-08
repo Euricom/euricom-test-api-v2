@@ -1,5 +1,4 @@
-import { swaggerComponent } from "@/server/swagger";
-import { z } from "zod";
+import { z, swaggerComponent } from "@/server/swagger";
 
 export const UserSchema = swaggerComponent(
   "user",

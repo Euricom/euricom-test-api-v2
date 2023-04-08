@@ -32,7 +32,7 @@ swaggerPath({
   path: "/api/v1/users",
   tags: ["users"],
   request: {
-    params: ParamsSchema,
+    query: ParamsSchema,
   },
   responses: {
     200: {
@@ -110,11 +110,11 @@ swaggerPath({
 
 export function POST(request: Request) {
   const handler = async () => {
-    const json = await request.json();
-    const body = UserSchemaCreate.parse(json);
+    const body = await request.json();
+    const data = UserSchemaCreate.parse(body);
 
     const user = {
-      ...body,
+      ...data,
       id: new Date().valueOf(),
       createdAt: new Date(),
     };

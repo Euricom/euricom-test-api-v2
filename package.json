@@ -9,7 +9,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@anatine/zod-openapi": "^1.12.0",
     "@asteasolutions/zod-to-openapi": "^4.5.3",
     "@faker-js/faker": "^7.6.0",
     "@mdx-js/loader": "^2.3.0",
@@ -19,10 +18,9 @@
     "@types/swagger-ui-react": "^4.18.0",
     "glob": "^9.3.4",
     "lodash": "^4.17.21",
-    "next": "13.2.5-canary.28",
+    "next": "^13.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "remix-params-helper": "^0.4.10",
     "sort-on": "^5.2.0",
     "swagger-ui-react": "^4.18.2",
     "zod": "^3.21.4"
