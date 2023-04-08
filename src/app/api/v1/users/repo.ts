@@ -1,24 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { z } from "zod";
-
-export const userSchema = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
-  age: z.number().min(18).max(80),
-  email: z.string().email(),
-  image: z.string(),
-  phone: z.string(),
-  company: z.string(),
-  address: z.object({
-    street: z.string(),
-    city: z.string(),
-    zip: z.string(),
-  }),
-});
-
-type User = z.infer<typeof userSchema> & {
-  id: number;
-};
+import { type User } from "./schema";
 
 let users: User[] = generateUsers(100);
 
@@ -40,6 +21,7 @@ function generateUsers(count: number) {
       image: imageUrl,
       phone: faker.phone.number(),
       company: faker.company.name(),
+      createdAt: faker.date.past(),
       address: {
         street: faker.address.street(),
         city: faker.address.city(),

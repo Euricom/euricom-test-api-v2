@@ -5,8 +5,8 @@ import {
   NotFoundError,
   ConflictError,
 } from "@/server/httpUtils";
-import { getOrCreateBasket } from "@/server/repos/basket";
-import { getById as getProductById } from "@/server/repos/products";
+import { getOrCreateBasket } from "../../../repo";
+import { getById as getProductById } from "../../../../products/repo";
 import { z } from "zod";
 
 type Context = {

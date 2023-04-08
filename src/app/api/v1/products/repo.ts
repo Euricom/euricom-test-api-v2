@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-export const productSchema = z.object({
-  id: z.number(),
+export const partialProductSchema = z.object({
   sku: z.string(),
   title: z.string(),
   stocked: z.boolean(),
@@ -10,6 +9,13 @@ export const productSchema = z.object({
   image: z.string().optional(),
   basePrice: z.number().optional(),
 });
+
+export const productSchema = partialProductSchema.merge(
+  z.object({
+    id: z.number(),
+    createdAt: z.date(),
+  })
+);
 
 type Product = z.infer<typeof productSchema>;
 
@@ -28,6 +34,7 @@ export function seed() {
       title: "iPhone",
       stocked: true,
       price: 1000,
+      createdAt: new Date(),
     },
   ];
 }

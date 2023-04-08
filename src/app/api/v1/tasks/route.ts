@@ -1,72 +1,81 @@
-import { badRequest, ok } from "@/server/httpUtils";
-import { addTask, getAllTasks } from "@/server/repos/tasks";
-import { z } from "zod";
+import { ok, withErrorHandling } from "@/server/httpUtils";
+import { addTask, getAllTasks } from "./repo";
+import { swaggerComponent, swaggerPath } from "@/server/swagger";
+import { taskSchema } from "./schema";
 
-const taskPostSchema = z
-  .object({
-    desc: z.string(),
-    completed: z
-      .boolean()
-      .optional()
-      .transform((val) => !!val),
-  })
-  .strict();
+//
+// GET /api/v1/tasks
+//
 
-/**
- * @swagger
- * /api/v1/tasks:
- *   get:
- *     description: Gets all tasks
- *     tags: [tasks]
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *             $ref: '#/components/schemas/task'
- */
+// Swagger
+swaggerPath({
+  method: "get",
+  path: "/api/v1/tasks",
+  tags: ["tasks"],
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: taskSchema,
+        },
+      },
+    },
+  },
+});
+
 export function GET() {
   const tasks = getAllTasks();
-
   return ok(tasks);
 }
 
-/**
- * @swagger
- * /api/v1/tasks/{id}:
- *   post:
- *     description: Create a task
- *     tags: [tasks]
- *     consumes:
- *       - application/json
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/task'
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *             $ref: '#/components/schemas/task'
- *       404:
- *         description: NOT_FOUND
- */
-export function POST(request: Request) {
-  const result = taskPostSchema.safeParse(request.body);
-  if (!result.success) {
-    return badRequest({
-      message: "Invalid task",
-      errors: result.error.format(),
-    });
-  }
+//
+// POST /api/v1/tasks
+//
 
-  const newTask = addTask({
-    ...result.data,
-    id: new Date().valueOf(),
-  });
-  return ok(newTask);
+const taskSchemaCreate = swaggerComponent(
+  "taskCreate",
+  taskSchema.omit({ id: true })
+);
+
+swaggerPath({
+  method: "post",
+  path: "/api/v1/tasks",
+  tags: ["tasks"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: taskSchemaCreate,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: taskSchema,
+        },
+      },
+    },
+    400: {
+      description: "BAD_REQUEST",
+    },
+  },
+});
+
+export function POST(request: Request) {
+  const handler = async () => {
+    const json = await request.json();
+    const body = taskSchemaCreate.parse(json);
+    const newTask = addTask({
+      ...body,
+      id: new Date().valueOf(),
+    });
+    return ok(newTask);
+  };
+
+  return withErrorHandling(handler);
 }

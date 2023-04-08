@@ -1,52 +1,57 @@
-import { badRequest, ok } from "@/server/httpUtils";
-import { addUser, getAllUsers, userSchema } from "@/server/repos/users";
 import sortOn from "sort-on";
 import { chain } from "lodash";
+import { ok, withErrorHandling } from "@/server/httpUtils";
+import { getSearchParams } from "@/server/requestUtils";
+import { swaggerComponent, swaggerPath, z } from "@/server/swagger";
+import { UserSchema } from "./schema";
+import { addUser, getAllUsers } from "./repo";
 
-/**
- * @swagger
- * /api/v1/users:
- *   get:
- *     description: Gets all users
- *     tags: [users]
- *     parameters:
- *     - in: query
- *       name: page
- *       schema:
- *         type: integer
- *     - in: query
- *       name: pageSize
- *       schema:
- *         type: integer
- *     - in: query
- *       name: sortBy
- *       schema:
- *         type: string
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *              type: object
- *              properties:
- *                items:
- *                  $ref: '#/components/schemas/user'
- *                total:
- *                  type: number
- *                page:
- *                  type: number
- *                pageSize:
- *                  type: number
- */
+//
+// GET /api/v1/tasks
+//
+
+const ParamsSchema = z.object({
+  page: z.coerce.number().optional(),
+  pageSize: z.coerce.number().optional(),
+  sortBy: z.string().optional(),
+});
+
+const UserListSchema = swaggerComponent(
+  "userList",
+  z.object({
+    items: z.array(UserSchema),
+    total: z.number(),
+    page: z.number(),
+    pageSize: z.number(),
+  })
+);
+
+// Swagger
+swaggerPath({
+  method: "get",
+  path: "/api/v1/users",
+  tags: ["users"],
+  request: {
+    params: ParamsSchema,
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: UserListSchema,
+        },
+      },
+    },
+  },
+});
 export function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const page = Number(searchParams.get("page")) || 0;
-  const pageSize = Number(searchParams.get("pageSize")) || 20;
-  const sortBy = searchParams.get("sort") || "";
-  console.log("page:", page);
-  console.log("pageSize:", pageSize);
-  console.log("sortBy:", sortBy);
+  const {
+    page = 0,
+    pageSize = 20,
+    sortBy = "",
+  } = getSearchParams(request, ParamsSchema);
+  console.log(`getUsers: page=${page}, pageSize=${pageSize}, sortBy=${sortBy}`);
 
   let entities = getAllUsers();
   if (sortBy) {
@@ -65,43 +70,57 @@ export function GET(request: Request) {
   });
 }
 
-/**
- * @swagger
- * /api/v1/users:
- *   post:
- *     description: Create a user
- *     tags: [users]
- *     consumes:
- *       - application/json
- *     parameters:
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/user'
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *             $ref: '#/components/schemas/user'
- *       404:
- *         description: NOT_FOUND
- */
-export function POST(request: Request) {
-  const result = userSchema.safeParse(request.body);
-  if (!result.success) {
-    return badRequest({
-      message: "Invalid user",
-      errors: result.error.format(),
-    });
-  }
+//
+// POST /api/v1/users
+// Create a new user
+//
 
-  const user = {
-    ...result.data,
-    id: new Date().valueOf(),
+const UserSchemaCreate = swaggerComponent(
+  "userCreate",
+  UserSchema.omit({ id: true, createdAt: true })
+);
+
+swaggerPath({
+  method: "post",
+  path: "/api/v1/users",
+  tags: ["users"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: UserSchemaCreate,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: UserSchema,
+        },
+      },
+    },
+    400: {
+      description: "BAD_REQUEST",
+    },
+  },
+});
+
+export function POST(request: Request) {
+  const handler = async () => {
+    const json = await request.json();
+    const body = UserSchemaCreate.parse(json);
+
+    const user = {
+      ...body,
+      id: new Date().valueOf(),
+      createdAt: new Date(),
+    };
+    addUser(user);
+    return ok(user);
   };
-  addUser(user);
-  return ok(user);
+
+  return withErrorHandling(handler);
 }

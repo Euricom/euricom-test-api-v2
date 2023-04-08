@@ -1,12 +1,4 @@
-import { z } from "zod";
-
-export const taskSchema = z.object({
-  id: z.number(),
-  desc: z.string(),
-  completed: z.boolean(),
-});
-
-type Task = z.infer<typeof taskSchema>;
+import type { Task } from "./schema";
 
 let tasks: Task[] = [];
 seedTasks();

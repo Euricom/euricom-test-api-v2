@@ -1,6 +1,7 @@
-import { badRequest, noContent, notFound, ok } from "@/server/httpUtils";
-import { deleteUser, getUser } from "@/server/repos/users";
-import { z } from "zod";
+import { noContent, notFound, ok, withErrorHandling } from "@/server/httpUtils";
+import { deleteUser, getUser } from "../repo";
+import { UserSchema } from "../schema";
+import { z, swaggerComponent, swaggerPath } from "@/server/swagger";
 
 type Context = {
   params: {
@@ -8,150 +9,153 @@ type Context = {
   };
 };
 
-const userPutSchema = z
-  .object({
-    firstName: z.string().optional(),
-    lastName: z.string().optional(),
-    age: z.number().min(18).max(80).optional(),
-    email: z.string().email().optional(),
-    image: z.string().optional(),
-    phone: z.string().optional(),
-    company: z.string().optional(),
-    address: z
-      .object({
-        street: z.string().optional(),
-        city: z.string().optional(),
-        zip: z.string().optional(),
-      })
-      .optional(),
-  })
-  .strict();
+//
+// PUT /api/v1/users/{id}
+// Update a user
+//
 
-/**
- * @swagger
- * /api/v1/users/{id}:
- *   put:
- *     description: Updates a User
- *     tags: [users]
- *     consumes:
- *       - application/json
- *     parameters:
- *     - name: "id"
- *       in: "path"
- *       required: true
- *       type: "integer"
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/user'
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *             $ref: '#/components/schemas/user'
- *       404:
- *         description: NOT_FOUND
- *       400:
- *         description: BAD_REQUEST
- */
+const UserSchemaUpdate = swaggerComponent(
+  "userUpdate",
+  UserSchema.omit({ id: true, createdAt: true }).partial()
+);
+swaggerPath({
+  method: "put",
+  path: "/api/v1/users/{id}",
+  tags: ["users"],
+  request: {
+    params: z.object({ id: z.number() }),
+    body: {
+      content: {
+        "application/json": {
+          schema: UserSchemaUpdate,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: UserSchema,
+        },
+      },
+    },
+    400: {
+      description: "BAD_REQUEST",
+    },
+    404: {
+      description: "NOT_FOUND",
+    },
+  },
+});
+
 export async function PUT(request: Request, { params }: Context) {
-  const user = getUser(Number(params.id));
-  if (!user) {
-    return notFound(`User with id ${params.id} not found`);
-  }
+  const handler = async () => {
+    const user = getUser(Number(params.id));
+    if (!user) {
+      return notFound(`User with id ${params.id} not found`);
+    }
 
-  const json = await request.json();
-  const result = userPutSchema.safeParse(json);
-  if (!result.success) {
-    return badRequest({
-      message: "Invalid User",
-      errors: result.error.format(),
-    });
-  }
+    const body = await request.json();
+    const data = UserSchemaUpdate.parse(body);
 
-  user.firstName = result.data.firstName
-    ? result.data.firstName
-    : user.firstName;
-  user.lastName = result.data.lastName ? result.data.lastName : user.lastName;
-  user.email = result.data.email ? result.data.email : user.email;
-  user.age = result.data.age ? result.data.age : user.age;
-  user.image = result.data.image ? result.data.image : user.image;
-  user.phone = result.data.phone ? result.data.phone : user.phone;
-  user.company = result.data.company ? result.data.company : user.company;
-  if (result.data.address) {
-    user.address.street = result.data.address.street
-      ? result.data.address.street
-      : user.address.street;
-    user.address.city = result.data.address.city
-      ? result.data.address.city
-      : user.address.city;
-    user.address.zip = result.data.address.zip
-      ? result.data.address.zip
-      : user.address.zip;
-  }
-  return ok(user);
+    user.firstName = data.firstName ? data.firstName : user.firstName;
+    user.lastName = data.lastName ? data.lastName : user.lastName;
+    user.email = data.email ? data.email : user.email;
+    user.age = data.age ? data.age : user.age;
+    user.image = data.image ? data.image : user.image;
+    user.phone = data.phone ? data.phone : user.phone;
+    user.company = data.company ? data.company : user.company;
+    if (data.address) {
+      user.address.street = data.address.street
+        ? data.address.street
+        : user.address.street;
+      user.address.city = data.address.city
+        ? data.address.city
+        : user.address.city;
+      user.address.zip = data.address.zip ? data.address.zip : user.address.zip;
+    }
+    return ok(user);
+  };
+  return withErrorHandling(handler);
 }
 
-/**
- * @swagger
- * /api/v1/users/{id}:
- *   delete:
- *     description: Removes a user
- *     tags: [users]
- *     parameters:
- *     - name: "id"
- *       in: "path"
- *       required: true
- *       type: "integer"
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *             $ref: '#/components/schemas/user'
- *       204:
- *         description: NO_CONTENT
- */
+//
+// DELETE /api/v1/users/{id}
+// Delete a user
+//
+
+swaggerPath({
+  method: "delete",
+  path: "/api/v1/users/{id}",
+  tags: ["users"],
+  request: {
+    params: z.object({ id: z.number() }),
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: UserSchema,
+        },
+      },
+    },
+    201: {
+      description: "NO_CONTENT",
+    },
+  },
+});
+
 export function DELETE(request: Request, { params }: Context) {
-  const user = getUser(Number(params.id));
-  if (!user) {
-    return noContent();
-  }
+  const handler = () => {
+    const user = getUser(Number(params.id));
+    if (!user) {
+      return noContent();
+    }
 
-  const deletedUser = deleteUser(user);
-  return ok(deletedUser);
+    const deletedUser = deleteUser(user);
+    return ok(deletedUser);
+  };
+  return withErrorHandling(handler);
 }
 
-/**
- * @swagger
- * /api/v1/users/{id}:
- *   get:
- *     description: Get a single user by id
- *     tags: [users]
- *     parameters:
- *     - name: "id"
- *       in: "path"
- *       required: true
- *       type: "integer"
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *             $ref: '#/components/schemas/user'
- *       404:
- *         description: NOT_FOUND
- */
-export function GET(request: Request, { params }: Context) {
-  const user = getUser(Number(params.id));
-  if (!user) {
-    return notFound(`User with id ${params.id} not found`);
-  }
+//
+// GET /api/v1/users/{id}
+// Get a user by id
+//
 
-  return ok(user);
+swaggerPath({
+  method: "get",
+  path: "/api/v1/users/{id}",
+  tags: ["users"],
+  request: {
+    params: z.object({ id: z.number() }),
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: UserSchema,
+        },
+      },
+    },
+    404: {
+      description: "NO_FOUND",
+    },
+  },
+});
+
+export function GET(request: Request, { params }: Context) {
+  const handler = () => {
+    const user = getUser(Number(params.id));
+    if (!user) {
+      return notFound(`User with id ${params.id} not found`);
+    }
+
+    return ok(user);
+  };
+  return withErrorHandling(handler);
 }

@@ -1,5 +1,5 @@
 import { notFound, ok, internalServerError } from "@/server/httpUtils";
-import { getOrCreateBasket, clearBasket } from "@/server/repos/basket";
+import { getOrCreateBasket, clearBasket } from "../repo";
 
 type Context = {
   params: {

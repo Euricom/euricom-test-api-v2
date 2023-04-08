@@ -1,6 +1,13 @@
-import { badRequest, noContent, notFound, ok } from "@/server/httpUtils";
-import { deleteTask, getTask } from "@/server/repos/tasks";
-import { z } from "zod";
+import {
+  NotFoundError,
+  noContent,
+  notFound,
+  ok,
+  withErrorHandling,
+} from "@/server/httpUtils";
+import { deleteTask, getTask } from "../repo";
+import { taskSchema } from "../schema";
+import { swaggerComponent, swaggerPath, z } from "@/server/swagger";
 
 type Context = {
   params: {
@@ -8,87 +15,86 @@ type Context = {
   };
 };
 
-const taskPutSchema = z
-  .object({
-    desc: z.string().optional(),
-    completed: z.boolean().optional(),
-  })
-  .strict();
+//
+// PUT /api/v1/tasks/{id}
+//
 
-/**
- * @swagger
- * /api/v1/tasks/{id}:
- *   put:
- *     description: Updates a task
- *     tags: [tasks]
- *     consumes:
- *     - application/json
- *     parameters:
- *     - name: "id"
- *       in: "path"
- *       required: true
- *       type: "integer"
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/task'
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *             $ref: '#/components/schemas/task'
- *       404:
- *         description: NOT_FOUND
- *       400:
- *         description: BAD_REQUEST
- */
-export async function PUT(request: Request, { params }: Context) {
-  const task = getTask(Number(params.id));
-  if (!task) {
-    return notFound(`Task with id ${params.id} not found`);
-  }
+const taskSchemaUpdate = swaggerComponent(
+  "taskUpdate",
+  taskSchema.omit({ id: true }).partial()
+);
+swaggerPath({
+  method: "put",
+  path: "/api/v1/tasks/{id}",
+  tags: ["tasks"],
+  request: {
+    params: z.object({ id: z.number() }),
+    body: {
+      content: {
+        "application/json": {
+          schema: taskSchemaUpdate,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: taskSchema,
+        },
+      },
+    },
+    400: {
+      description: "BAD_REQUEST",
+    },
+    404: {
+      description: "NOT_FOUND",
+    },
+  },
+});
+export function PUT(request: Request, { params }: Context) {
+  const handler = async () => {
+    const task = getTask(Number(params.id));
+    if (!task) {
+      throw new NotFoundError(`Task with id ${params.id} not found`);
+    }
 
-  const json = await request.json();
-  const result = taskPutSchema.safeParse(json);
-  if (!result.success) {
-    return badRequest({
-      message: "Invalid task",
-      errors: result.error.format(),
-    });
-  }
-
-  task.desc = result.data.desc ? result.data.desc : task.desc;
-  task.completed =
-    result.data.completed !== undefined
-      ? result.data.completed
-      : task.completed;
-  return ok(task);
+    const json = await request.json();
+    const data = taskSchemaUpdate.partial().parse(json);
+    task.desc = data.desc ? data.desc : task.desc;
+    task.completed =
+      data.completed !== undefined ? data.completed : task.completed;
+    return ok(task);
+  };
+  return withErrorHandling(handler);
 }
 
-/**
- * @swagger
- * /api/v1/tasks/{id}:
- *   delete:
- *     description: Removes a task
- *     tags: [tasks]
- *     parameters:
- *     - name: "id"
- *       in: "path"
- *       required: true
- *       type: "integer"
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *             $ref: '#/components/schemas/task'
- *       204:
- *         description: NO_CONTENT
- */
+//
+// DELETE /api/v1/tasks/{id}
+//
+swaggerPath({
+  method: "delete",
+  path: "/api/v1/tasks/{id}",
+  tags: ["tasks"],
+  request: {
+    params: z.object({ id: z.number() }),
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: taskSchema,
+        },
+      },
+    },
+    404: {
+      description: "NOT_FOUND",
+    },
+  },
+});
 export function DELETE(request: Request, { params }: Context) {
   const task = getTask(Number(params.id));
   if (!task) {
@@ -99,27 +105,31 @@ export function DELETE(request: Request, { params }: Context) {
   return ok(deletedTask);
 }
 
-/**
- * @swagger
- * /api/v1/tasks/{id}:
- *   get:
- *     description: Gets a task
- *     tags: [tasks]
- *     parameters:
- *     - name: "id"
- *       in: "path"
- *       required: true
- *       type: "integer"
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *             $ref: '#/components/schemas/task'
- *       404:
- *         description: NOT_FOUND
- */
+//
+// GET /api/v1/tasks/{id}
+//
+
+swaggerPath({
+  method: "get",
+  path: "/api/v1/tasks/{id}",
+  tags: ["tasks"],
+  request: {
+    params: z.object({ id: z.number() }),
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: taskSchema,
+        },
+      },
+    },
+    404: {
+      description: "NOT_FOUND",
+    },
+  },
+});
 export function GET(request: Request, { params }: Context) {
   const task = getTask(Number(params.id));
   if (!task) {

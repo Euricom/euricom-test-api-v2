@@ -1,5 +1,5 @@
 import { badRequest, ok } from "@/server/httpUtils";
-import { add, getAll, productSchema } from "@/server/repos/products";
+import { add, getAll, productSchema } from "./repo";
 import sortOn from "sort-on";
 import { chain } from "lodash";
 
