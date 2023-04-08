@@ -57,8 +57,7 @@ export const createSwaggerSpec = (config: OpenAPIObjectConfig) => {
   req.keys().forEach(function (key) {
     // due to an unknown issue is the registry different between direct
     // import (ESM) and using `require.context`, therefore we
-    // get the registry is from the exported registry in this file
-    console.log("key", key);
+    // get the registry via the exported registry in this file
     const theModule: any = req(key);
     if (theModule.registry) {
       registry = theModule.registry;

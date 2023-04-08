@@ -4,6 +4,5 @@ import config from "./config";
 
 export function GET() {
   const spec = createSwaggerSpec(config);
-  console.log("spec", spec);
   return ok(spec);
 }
