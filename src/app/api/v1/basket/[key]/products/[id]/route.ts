@@ -8,63 +8,66 @@ import {
 import { getOrCreateBasket } from "../../../repo";
 import { getById as getProductById } from "../../../../products/repo";
 import { z } from "zod";
+import { swaggerPath } from "@/server/swagger";
+import { BasketSchema } from "../../../schema";
 
 type Context = {
   params: {
     key: string;
-    id: string;
+    productId: string;
   };
 };
 
-const addProductSchema = z.object({
+const AddProductSchema = z.object({
   quantity: z.number(),
 });
 
-/**
- * @swagger
- * /api/v1/basket/{key}/products/{id}:
- *   post:
- *     description: Add a product on the basket
- *     tags: [basket]
- *     parameters:
- *     - in: path
- *       name: key
- *       description: The basket key
- *       required: true
- *       schema:
- *         type: string
- *     - in: path
- *       name: id
- *       description: The id of the product to add
- *       required: true
- *       schema:
- *         type: string
- *     consumes:
- *       - application/json
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *              type: object
- *              properties:
- *                quantity:
- *                  type: number
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *             $ref: '#/components/schemas/basket'
- *       409:
- *         description: CONFLICT
- *       404:
- *         description: NOT_FOUND
- */
+//
+// POST /api/v1/basket/{key}/products/{id}
+//
+
+swaggerPath({
+  method: "post",
+  path: "/api/v1/basket/{key}/products/{productId}",
+  description: "Add a product on the basket",
+  tags: ["basket"],
+  request: {
+    params: z.object({
+      productId: z
+        .string()
+        .openapi({ description: "The id of the product to add" }),
+      key: z.string().openapi({ description: "The basket key" }),
+    }),
+    body: {
+      content: {
+        "application/json": {
+          schema: AddProductSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: BasketSchema,
+        },
+      },
+    },
+    409: {
+      description: "CONFLICT",
+    },
+    404: {
+      description: "NOT_FOUND",
+    },
+  },
+});
+
 export function POST(request: Request, { params }: Context) {
   const handler = async () => {
     const basket = getOrCreateBasket(params.key);
-    const product = getProductById(Number(params.id));
+    const product = getProductById(Number(params.productId));
     if (!product || !basket) {
       throw new NotFoundError();
     }
@@ -72,9 +75,9 @@ export function POST(request: Request, { params }: Context) {
       throw new ConflictError("1202", "Product not in stock");
     }
 
-    const productId = Number(params.id);
-    const json = await request.json();
-    const data = addProductSchema.parse(json);
+    const productId = Number(params.productId);
+    const body = await request.json();
+    const data = AddProductSchema.parse(body);
     let quantity = Math.floor(Number(data.quantity) || 1);
 
     // add product
@@ -97,39 +100,42 @@ export function POST(request: Request, { params }: Context) {
   return withErrorHandling(handler);
 }
 
-/**
- * @swagger
- * /api/v1/basket/{key}/products/{id}:
- *   delete:
- *     description: Remove product from basket
- *     tags: [basket]
- *     parameters:
- *     - in: path
- *       name: key
- *       description: The basket key
- *       required: true
- *       schema:
- *         type: string
- *     - in: path
- *       name: id
- *       description: The id of the product to add
- *       required: true
- *       schema:
- *         type: string
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *              $ref: '#/components/schemas/basket'
- *       404:
- *         description: NOT_FOUND
- */
+//
+// DELETE /api/v1/basket/{key}/products/{productId}
+//
+
+swaggerPath({
+  method: "delete",
+  path: "/api/v1/basket/{key}/products/{productId}",
+  description: "Remove product from basket",
+  tags: ["basket"],
+  request: {
+    params: z.object({
+      productId: z
+        .string()
+        .openapi({ description: "The id of the product to remove" }),
+      key: z.string().openapi({ description: "The basket key" }),
+    }),
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: BasketSchema,
+        },
+      },
+    },
+    404: {
+      description: "NOT_FOUND",
+    },
+  },
+});
+
 export function DELETE(request: Request, { params }: Context) {
   const handler = () => {
     const basket = getOrCreateBasket(params.key);
-    const productId = Number(params.id);
+    const productId = Number(params.productId);
 
     const index = basket.find((item) => item.productId === productId);
     if (!index) {

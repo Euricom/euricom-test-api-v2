@@ -1,4 +1,4 @@
-import { badRequest, ok, withErrorHandling } from "@/server/httpUtils";
+import { ok, withErrorHandling } from "@/server/httpUtils";
 import { add, getAll } from "./repo";
 import sortOn from "sort-on";
 import { chain } from "lodash";

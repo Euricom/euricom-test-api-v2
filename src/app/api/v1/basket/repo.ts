@@ -1,16 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { z } from "zod";
-
-export const basketItemSchema = z.object({
-  id: z.number(),
-  productId: z.number(),
-  quantity: z.number(),
-});
-
-export const basketSchema = z.array(basketItemSchema);
-
-type BasketItem = z.infer<typeof basketItemSchema>;
-type Basket = z.infer<typeof basketSchema>;
+import type { Basket } from "./schema";
 
 type Baskets = {
   [key: string]: Basket;

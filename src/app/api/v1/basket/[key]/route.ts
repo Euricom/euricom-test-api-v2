@@ -1,5 +1,7 @@
-import { notFound, ok, internalServerError } from "@/server/httpUtils";
+import { notFound, ok, withErrorHandling } from "@/server/httpUtils";
 import { getOrCreateBasket, clearBasket } from "../repo";
+import { z, swaggerPath } from "@/server/swagger";
+import { BasketSchema } from "../schema";
 
 type Context = {
   params: {
@@ -7,63 +9,82 @@ type Context = {
   };
 };
 
-/**
- * @swagger
- * /api/v1/basket/{key}:
- *   get:
- *     description: Gets all basket items
- *     tags: [basket]
- *     parameters:
- *     - in: path
- *       name: key
- *       required: true
- *       schema:
- *         type: string
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *              $ref: '#/components/schemas/basket'
- *       404:
- *         description: NOT_FOUND
- */
-export function GET(request: Request, { params }: Context) {
-  if (!params.key) {
-    return notFound("Basket without key not available");
-  }
+//
+// GET /api/v1/basket
+//
 
-  const basket = getOrCreateBasket(params.key);
-  // what does this even mean?
-  // it's a test api, to simulate a 500 error
-  if (basket.length > 5) {
-    throw internalServerError({ message: "Something went wrong", details: {} });
-  }
-  return ok(basket);
+swaggerPath({
+  method: "get",
+  path: "/api/v1/basket/{key}",
+  description: "Gets all basket items",
+  tags: ["basket"],
+  request: {
+    params: z.object({
+      key: z.string(),
+    }),
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: BasketSchema,
+        },
+      },
+    },
+    404: {
+      description: "NOT_FOUND",
+    },
+  },
+});
+
+export function GET(request: Request, { params }: Context) {
+  const handler = () => {
+    if (!params.key) {
+      return notFound("Basket without key not available");
+    }
+
+    const basket = getOrCreateBasket(params.key);
+    // what does this even mean?
+    // it's a test api, to simulate a 500 error
+    if (basket.length > 5) {
+      throw new Error("I can't handle this, abort abort!");
+    }
+    return ok(basket);
+  };
+
+  return withErrorHandling(handler);
 }
 
-/**
- * @swagger
- * /api/v1/basket/{key}:
- *   delete:
- *     description: Clear the basket
- *     tags: [basket]
- *     parameters:
- *     - name: "key"
- *       in: "path"
- *       required: true
- *       type: "string"
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *              $ref: '#/components/schemas/basket'
- *       404:
- *         description: NOT_FOUND
- */
+//
+// DELETE /api/v1/basket/{key}
+//
+
+swaggerPath({
+  method: "delete",
+  path: "/api/v1/basket/{key}",
+  description: "Clear the basket",
+  tags: ["basket"],
+  request: {
+    params: z.object({
+      key: z.string(),
+    }),
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: BasketSchema,
+        },
+      },
+    },
+    404: {
+      description: "NOT_FOUND",
+    },
+  },
+});
+
 export function DELETE(request: Request, { params }: Context) {
   if (!params.key) {
     return notFound("Basket without key not available");
