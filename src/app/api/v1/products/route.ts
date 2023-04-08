@@ -1,52 +1,60 @@
-import { badRequest, ok } from "@/server/httpUtils";
-import { add, getAll, productSchema } from "./repo";
+import { badRequest, ok, withErrorHandling } from "@/server/httpUtils";
+import { add, getAll } from "./repo";
 import sortOn from "sort-on";
 import { chain } from "lodash";
+import { swaggerComponent, swaggerPath, z } from "@/server/swagger";
+import { ProductSchema } from "./schema";
+import { getSearchParams } from "@/server/requestUtils";
 
-/**
- * @swagger
- * /api/v1/products:
- *   get:
- *     description: Gets all products
- *     tags: [products]
- *     parameters:
- *     - in: query
- *       name: page
- *       schema:
- *         type: integer
- *     - in: query
- *       name: pageSize
- *       schema:
- *         type: integer
- *     - in: query
- *       name: sortBy
- *       schema:
- *         type: string
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *              type: object
- *              properties:
- *                items:
- *                  $ref: '#/components/schemas/product'
- *                total:
- *                  type: number
- *                page:
- *                  type: number
- *                pageSize:
- *                  type: number
- */
+//
+// GET /api/v1/products
+//
+
+const ParamsSchema = z.object({
+  page: z.coerce.number().optional(),
+  pageSize: z.coerce.number().optional(),
+  sortBy: z.string().optional(),
+});
+
+const ProductListSchema = swaggerComponent(
+  "productList",
+  z.object({
+    items: z.array(ProductSchema),
+    total: z.number(),
+    page: z.number(),
+    pageSize: z.number(),
+  })
+);
+
+// Swagger
+swaggerPath({
+  method: "get",
+  path: "/api/v1/products",
+  tags: ["products"],
+  request: {
+    query: ParamsSchema,
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: ProductListSchema,
+        },
+      },
+    },
+  },
+});
+
 export function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const page = Number(searchParams.get("page")) || 0;
-  const pageSize = Number(searchParams.get("pageSize")) || 20;
-  const sortBy = searchParams.get("sort") || "";
-  console.log("page:", page);
-  console.log("pageSize:", pageSize);
-  console.log("sortBy:", sortBy);
+  const {
+    page = 0,
+    pageSize = 20,
+    sortBy = "",
+  } = getSearchParams(request, ParamsSchema);
+  console.log(
+    `getProducts: page=${page}, pageSize=${pageSize}, sortBy=${sortBy}`
+  );
 
   let entities = getAll();
   if (sortBy) {
@@ -65,43 +73,58 @@ export function GET(request: Request) {
   });
 }
 
-/**
- * @swagger
- * /api/v1/products:
- *   post:
- *     description: Create a product
- *     tags: [products]
- *     consumes:
- *       - application/json
- *     parameters:
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/product'
- *     responses:
- *       200:
- *         description: OK
- *         content:
- *           application/json:
- *            schema:
- *             $ref: '#/components/schemas/product'
- *       404:
- *         description: NOT_FOUND
- */
-export function POST(request: Request) {
-  const result = productSchema.safeParse(request.body);
-  if (!result.success) {
-    return badRequest({
-      message: "Invalid product",
-      errors: result.error.format(),
-    });
-  }
+//
+// POST /api/v1/products
+// Create a new product
+//
 
-  const product = {
-    ...result.data,
-    id: new Date().valueOf(),
+const ProductSchemaCreate = swaggerComponent(
+  "productCreate",
+  ProductSchema.omit({ id: true, createdAt: true, updatedAt: true })
+);
+
+swaggerPath({
+  method: "post",
+  path: "/api/v1/products",
+  tags: ["products"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: ProductSchemaCreate,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "OK",
+      content: {
+        "application/json": {
+          schema: ProductSchema,
+        },
+      },
+    },
+    400: {
+      description: "BAD_REQUEST",
+    },
+  },
+});
+
+export function POST(request: Request) {
+  const handler = async () => {
+    const body = await request.json();
+    const data = ProductSchemaCreate.parse(body);
+
+    const product = {
+      ...data,
+      id: new Date().valueOf(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    add(product);
+    return ok(product);
   };
-  add(product);
-  return ok(product);
+
+  return withErrorHandling(handler);
 }
