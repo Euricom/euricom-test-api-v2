@@ -73,6 +73,8 @@ export function POST(request: Request, { params }: Context) {
   const handler = async () => {
     const basket = getOrCreateBasket(params.key);
     const product = getProductById(Number(params.productId));
+    console.log("product", params, product, basket);
+
     if (!product || !basket) {
       throw new NotFoundError();
     }
@@ -172,7 +174,8 @@ export function PATCH(request: Request, { params }: Context) {
     } else {
       addProduct(params.key, product.id, quantity);
     }
-    return ok(basket);
+    const updatedBasket = getOrCreateBasket(params.key);
+    return ok(updatedBasket);
   };
 
   return withErrorHandling(handler);

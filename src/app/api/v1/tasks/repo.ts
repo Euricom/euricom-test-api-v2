@@ -1,13 +1,13 @@
 import type { Task } from "./schema";
 
 let tasks: Task[] = [];
-seedTasks();
+generateTasks();
 
 export function clearTasks() {
   tasks = [];
 }
 
-export function seedTasks() {
+export function generateTasks() {
   tasks = [
     {
       id: 1,

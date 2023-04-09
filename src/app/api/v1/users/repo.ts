@@ -3,7 +3,7 @@ import { type User } from "./schema";
 
 let users: User[] = generateUsers(100);
 
-function generateUsers(count: number) {
+export function generateUsers(count: number) {
   const users = [];
   for (let i = 0; i < count; i++) {
     // eslint-disable-line

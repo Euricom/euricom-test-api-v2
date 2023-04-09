@@ -1,13 +1,13 @@
 import { faker } from "@faker-js/faker";
 import type { Product } from "./schema";
 
-let products: Product[] = seed(100);
+let products: Product[] = generateProducts(100);
 
 export function clear() {
   products = [];
 }
 
-export function seed(count: number): Product[] {
+export function generateProducts(count: number): Product[] {
   const products = [];
   for (let i = 0; i < count; i++) {
     // imageUrl = `https://api.adorable.io/avatars/400/${firstName}-${lastName}`;

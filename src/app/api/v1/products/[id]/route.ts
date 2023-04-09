@@ -1,7 +1,6 @@
 import {
   NotFoundError,
   noContent,
-  notFound,
   ok,
   withErrorHandling,
 } from "@/server/httpUtils";
