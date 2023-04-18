@@ -1,10 +1,17 @@
 import { faker } from "@faker-js/faker";
 import { type User } from "./schema";
 
-let users: User[] = generateUsers(100);
+let users: User[];
+
+function ensureWeHaveUsers() {
+  console.log("ensureWeHaveUsers", users?.length);
+  if (users === undefined) {
+    users = generateUsers(100);
+  }
+}
 
 export function generateUsers(count: number) {
-  const users = [];
+  users = [];
   for (let i = 0; i < count; i++) {
     // eslint-disable-line
     const lastName = faker.name.lastName();
@@ -29,20 +36,25 @@ export function generateUsers(count: number) {
       },
     });
   }
+  console.log("generated users", count);
   return users;
 }
 
 export function getAllUsers() {
+  ensureWeHaveUsers();
   return users;
 }
 export function getUser(id: number) {
+  ensureWeHaveUsers();
   return users.find((user) => user.id === id);
 }
 export function deleteUser(user: User) {
+  ensureWeHaveUsers();
   users = users.filter((item) => user.id !== item.id);
   return user;
 }
 export function addUser(user: User) {
+  ensureWeHaveUsers();
   users.push(user);
   return user;
 }

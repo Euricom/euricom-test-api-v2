@@ -1,14 +1,20 @@
 import { faker } from "@faker-js/faker";
 import type { Product } from "./schema";
 
-let products: Product[] = generateProducts(100);
+let products: Product[];
+
+function ensureWeHaveProducts() {
+  if (!products) {
+    products = generateProducts(100);
+  }
+}
 
 export function clear() {
   products = [];
 }
 
 export function generateProducts(count: number): Product[] {
-  const products = [];
+  products = [];
   for (let i = 0; i < count; i++) {
     // imageUrl = `https://api.adorable.io/avatars/400/${firstName}-${lastName}`;
     const product = {
@@ -27,20 +33,25 @@ export function generateProducts(count: number): Product[] {
     product.updatedAt = product.createdAt;
     products.push(product);
   }
+  console.log("generated products", count);
   return products;
 }
 
 export function getAll() {
+  ensureWeHaveProducts();
   return products;
 }
 export function getById(id: number) {
+  ensureWeHaveProducts();
   return products.find((product) => product.id === id);
 }
 export function deleteItem(product: Product) {
+  ensureWeHaveProducts();
   products = products.filter((item) => product.id !== item.id);
   return product;
 }
 export function add(product: Product) {
+  ensureWeHaveProducts();
   products.push(product);
   return product;
 }
