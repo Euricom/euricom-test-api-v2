@@ -49,7 +49,7 @@ export function GET(request: Request) {
   const {
     page = 0,
     pageSize = 20,
-    sortBy = "",
+    sortBy = "firstName",
   } = getSearchParams(request, ParamsSchema);
   console.log(`getUsers: page=${page}, pageSize=${pageSize}, sortBy=${sortBy}`);
 
@@ -112,6 +112,8 @@ export function POST(request: Request) {
   const handler = async () => {
     const body = await request.json();
     const data = UserSchemaCreate.parse(body);
+
+    console.log("createUser", data);
 
     const user = {
       ...data,
