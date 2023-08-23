@@ -43,7 +43,7 @@ const config = {
           { key: "Access-Control-Allow-Origin", value: "*" },
           {
             key: "Access-Control-Allow-Methods",
-            value: "GET,PATCH,DELETE,POST,PUT",
+            value: "GET, PATCH, DELETE, POST, PUT, OPTIONS",
           },
           {
             key: "Access-Control-Allow-Headers",

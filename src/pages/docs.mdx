@@ -28,12 +28,12 @@ DELETE /api/v1/system
 - GET [/api/v1/tasks/1](/api/v1/tasks/1)
 
 ```
-POST /api/tasks
+POST /api/v1/tasks
 {
   "desc": "By some beer"
 }
 
-PATCH /api/tasks
+PATCH /api/v1/tasks
 {
   "completed": true
 }
@@ -50,7 +50,7 @@ DELETE /api/tasks/122
 - GET [/api/v1/users?sortBy=address.city](/api/v1/users?sort=address.city)
 
 ```
-POST /api/users
+POST /api/v1/users
 {
   "firstName": "peter",
   "lastName": "cosemans",
@@ -59,7 +59,7 @@ POST /api/users
   "role": "admin"
 }
 
-PUT /api/users/12
+PUT /api/v1/users/12
 {
   "firstName": "peter",
   "lastName": "cosemans",
@@ -68,7 +68,7 @@ PUT /api/users/12
   "role": "admin"
 }
 
-DELETE /api/users/12
+DELETE /api/v1/users/12
 ```
 
 ### Products
@@ -81,7 +81,7 @@ DELETE /api/users/12
 
 ```
 # create a new product
-POST /api/products
+POST /api/v1/products
 {
   "title": "my new product",
   "price": 9.99,
@@ -91,7 +91,7 @@ POST /api/products
 }
 
 # Update an existing product
-PUT /api/products/12
+PUT /api/v1/products/12
 {
   "title": "my new product",
   "price": 9.99,

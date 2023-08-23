@@ -15,6 +15,7 @@ import { getById as getProductById } from "../../../../products/repo";
 import { z } from "zod";
 import { swaggerPath } from "@/server/swagger";
 import { BasketSchema } from "../../../schema";
+import { NextResponse } from "next/server";
 
 type Context = {
   params: {
@@ -148,6 +149,12 @@ swaggerPath({
     },
   },
 });
+
+export function OPTIONS() {
+  // Issue; it look we need this for PATCH requests
+  // Why, I don't know (peterc)
+  return ok({});
+}
 
 export function PATCH(request: Request, { params }: Context) {
   const handler = async () => {
