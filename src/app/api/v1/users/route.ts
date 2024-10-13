@@ -1,5 +1,5 @@
 import sortOn from "sort-on";
-import { chain } from "lodash";
+import _ from "lodash";
 import { ok, withErrorHandling } from "@/server/httpUtils";
 import { getSearchParams } from "@/server/requestUtils";
 import { swaggerComponent, swaggerPath, z } from "@/server/swagger";
@@ -57,7 +57,7 @@ export function GET(request: Request) {
   if (sortBy) {
     entities = sortOn(entities, sortBy);
   }
-  const subset = chain(entities)
+  const subset = _.chain(entities)
     .drop(page * pageSize)
     .take(pageSize)
     .value();

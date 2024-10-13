@@ -1,7 +1,7 @@
 import { ok, withErrorHandling } from "@/server/httpUtils";
 import { add, getAll } from "./repo";
 import sortOn from "sort-on";
-import { chain } from "lodash";
+import _ from "lodash";
 import { swaggerComponent, swaggerPath, z } from "@/server/swagger";
 import { ProductSchema } from "./schema";
 import { getSearchParams } from "@/server/requestUtils";
@@ -14,6 +14,7 @@ const ParamsSchema = z.object({
   page: z.coerce.number().optional(),
   pageSize: z.coerce.number().optional(),
   sortBy: z.string().optional(),
+  filter: z.string().optional(),
 });
 
 const ProductListSchema = swaggerComponent(
@@ -51,6 +52,7 @@ export function GET(request: Request) {
     page = 0,
     pageSize = 20,
     sortBy = "",
+    filter = "",
   } = getSearchParams(request, ParamsSchema);
   console.log(
     `getProducts: page=${page}, pageSize=${pageSize}, sortBy=${sortBy}`
@@ -60,9 +62,10 @@ export function GET(request: Request) {
   if (sortBy) {
     entities = sortOn(entities, sortBy);
   }
-  const subset = chain(entities)
+  const subset = _.chain(entities)
     .drop(page * pageSize)
     .take(pageSize)
+    .filter((item) => item.title.toLowerCase().includes(filter.toLowerCase()))
     .value();
 
   return ok({
