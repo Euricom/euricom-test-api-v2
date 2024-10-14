@@ -62,7 +62,7 @@ export const badRequest = ({
       message,
       errors,
     },
-    { status: 404 }
+    { status: 400 }
   );
 };
 
@@ -94,6 +94,7 @@ export const withErrorHandling = async (
   try {
     return await handler();
   } catch (error) {
+    console.log("> error", error);
     if (error instanceof NotFoundError) {
       return notFound(error.message);
     }

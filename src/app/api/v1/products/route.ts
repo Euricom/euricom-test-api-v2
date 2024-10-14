@@ -115,6 +115,7 @@ swaggerPath({
 });
 
 export function POST(request: Request) {
+  console.log(">>>>>>>>");
   const handler = async () => {
     const body = await request.json();
     const data = ProductSchemaCreate.parse(body);
