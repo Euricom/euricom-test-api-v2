@@ -63,9 +63,9 @@ export function GET(request: Request) {
     entities = sortOn(entities, sortBy);
   }
   const subset = _.chain(entities)
+    .filter((item) => item.title.toLowerCase().includes(filter.toLowerCase()))
     .drop(page * pageSize)
     .take(pageSize)
-    .filter((item) => item.title.toLowerCase().includes(filter.toLowerCase()))
     .value();
 
   return ok({
